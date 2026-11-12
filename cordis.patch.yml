@@ -1,0 +1,5 @@
+# 海外跨平台热文搜索：overseas_search 工具（X/TikTok/YouTube 三平台适配器+语言分层）+ overseas-trending 技能 + 侧栏看板。
+# 浏览器半边由 dsh.client 声明加载。
+- insert:
+    - id: overseas-trending
+      name: 'dsh-overseas-trending'

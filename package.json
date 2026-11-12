@@ -1,0 +1,66 @@
+{
+  "name": "dsh-overseas-trending",
+  "version": "0.1.0",
+  "description": "海外跨平台热文搜索 · 输入任意关键词（中英文）一次搜索 X / TikTok / YouTube 三平台热门内容，每平台 Top N 统一列表（平台/标题/作者/播放/点赞/评论/发布时间/链接），语言优先分层（中文词优先中文内容），深色主题 HTML 报告（卡片/表格双视图）。需 RedFox API Key（YouTube 详情补全消耗较多积分），移植自 redfox-community skills/overseas-trending-search。",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/host.js",
+  "exports": {
+    ".": "./src/host.js",
+    "./client": "./dist/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./package.json": "./package.json"
+  },
+  "icon": "./icon.svg",
+  "files": [
+    "src",
+    "dist",
+    "lib",
+    "lab",
+    "skills",
+    "locale/*.json",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "twitter",
+    "tiktok",
+    "youtube",
+    "trending",
+    "redfox"
+  ],
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0",
+    "dsh": ">=0.2.1-rc.2 <0.3.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": []
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "live": "node scripts/live.mjs",
+    "dev": "node scripts/devserver.mjs",
+    "prepare": "npm run build",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.19.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10"
+  }
+}
