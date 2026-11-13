@@ -85,7 +85,7 @@ export const overseasSearchTool = {
     '海外跨平台热文搜索：输入任意关键词（中文/英文）一次搜索 X / TikTok / YouTube 三平台热门内容，每平台 Top N 统一列表（平台/标题/作者/播放/点赞/评论/发布时间/链接）。' +
     '语言优先分层：中文关键词优先中文内容、英文关键词优先英文内容。深色主题 HTML 报告（卡片/表格双视图）。' +
     '⚠️积分消耗较大：YouTube 点赞/评论需逐条调详情接口补全（每次搜索最多 20 次详情调用）——不要主动重复搜索或跑多个关键词组合。' +
-    'TikTok 热门多为历史内容，默认 1 天窗口会滤掉大部分 TikTok 结果，看 TikTok 热门建议 days 放宽到 3-7 或 0。' +
+    'TikTok 热门多为历史内容，默认 7 天窗口（已覆盖大部分 TikTok 热门）；要更全可传 days=30 或 0=不限。' +
     '需要 RedFox API Key（面板「设置」页或环境变量 REDFOX_API_KEY）。',
   parameters: {
     type: 'object',
@@ -95,10 +95,10 @@ export const overseasSearchTool = {
       action: str('search 搜索；list 历史记录；get 读详情', { enum: ['search', 'list', 'get'] }),
       keywords: str('search：关键词，中英文均可，多个用英文逗号分隔（如 "人工智能,AI agent"）'),
       platforms: str('search：平台逗号分隔 x,tiktok,youtube（默认全部三个；某平台故障会优雅降级）'),
-      days: num('search：时间窗口最近 N 天（默认 1，0=不限；TikTok 建议放宽）'),
+      days: num('search：时间窗口最近 N 天（默认 7，0=不限）'),
       sortBy: str('search：排序 views/likes/comments/time（默认 views）'),
       top: num('search：每平台最多返回条数，默认 5（0=不限）'),
-      detailTop: num('search：YouTube 详情补全条数（默认 20，调小省积分；点赞/评论仅详情接口提供）'),
+      detailTop: num('search：YouTube 详情补全条数（默认 5；点赞/评论仅详情接口提供，调大更全但更慢更费积分）'),
       searchId: str('get 定位：目标搜索记录 id；缺省=最新一次'),
     },
   },

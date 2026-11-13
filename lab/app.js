@@ -171,7 +171,7 @@
           <div class="field"><label>PLATFORMS · 平台</label><div class="checks">${pfChecks}</div></div>
           <div class="form-row">
             <div class="field"><label>DAYS · 时间窗口（TikTok 热门多为历史内容，建议放宽）</label>
-              <select id="f-days"><option value="1" selected>最近 1 天</option><option value="3">最近 3 天</option><option value="7">最近 7 天</option><option value="30">最近 30 天</option><option value="0">不限</option></select></div>
+              <select id="f-days"><option value="1">最近 1 天</option><option value="3">最近 3 天</option><option value="7" selected>最近 7 天</option><option value="30">最近 30 天</option><option value="0">不限</option></select></div>
             <div class="field"><label>SORT · 排序指标</label>
               <select id="f-sort">${sortOptions}</select></div>
           </div>
@@ -179,7 +179,7 @@
             <div class="field"><label>TOP · 每平台条数（0=不限）</label>
               <select id="f-top"><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option></select></div>
             <div class="field"><label>DETAIL TOP · YouTube 详情补全条数（调小省积分）</label>
-              <select id="f-detail"><option value="10" selected>10</option><option value="20">20</option></select></div>
+              <select id="f-detail"><option value="0">0</option><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option></select></div>
           </div>
           <div class="hint" id="f-status"></div>
         </div>
@@ -427,7 +427,10 @@
           days: Number(document.getElementById('f-days')?.value) || 0,
           sort_by: document.getElementById('f-sort')?.value || 'views',
           top: Number(document.getElementById('f-top')?.value) || 5,
-          detail_top: Number(document.getElementById('f-detail')?.value) || 10,
+          detail_top: (() => {
+            const v = document.getElementById('f-detail')?.value
+            return v === undefined || v === '' ? 5 : Number(v)
+          })(),
         })
         if (r.ok === false) { toast(r.error, r.all_down); if (status) status.textContent = ''; return }
         toast(`搜索完成：共 ${r.search.total} 条`)
