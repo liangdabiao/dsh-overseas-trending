@@ -3,6 +3,8 @@
 > 输入任意关键词（中文/英文），一次搜索 X / TikTok / YouTube 三平台热门内容，每平台 Top N 统一列表，语言优先分层，深色主题交互式 HTML 报告（卡片/表格双视图）。
 
 dsh 插件（完整形态：原生工具 + 数据持久化 + 侧栏看板）。平台适配器模式，移植自 [redfox-community](https://github.com/redfox-data/redfox-community) 的 skills/overseas-trending-search，Python 引擎（digest.py + sources/ 共 963 行）全量重写为 Node。
+<img width="1998" height="1332" alt="image" src="https://github.com/user-attachments/assets/a47752ac-3f15-4983-a5a2-edac070770d9" />
+
 
 ## ⚠️ 实测要点（对上游的适配）
 
