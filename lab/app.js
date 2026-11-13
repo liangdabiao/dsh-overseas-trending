@@ -33,6 +33,32 @@
     return body
   }
 
+  // 打开外部链接：桌面端 iframe 里 window.open 会被 WebContentsView deny，
+  // 先请宿主用系统默认浏览器打开；宿主不支持（网页版/无桌面）时退回新窗口。
+  async function openLink(u) {
+    if (!u || u === '#' || u === 'about:blank') return
+    try {
+      const r = await apiPost('/api/open', { url: u })
+      if (r?.ok) { toast('已在系统浏览器打开'); return }
+      throw new Error(r?.error || '打开失败')
+    } catch (e) {
+      const win = window.open(u, '_blank', 'noopener')
+      if (!win) {
+        const hint = /404|not found/i.test(String(e.message))
+          ? '宿主还没重启（/api/open 未上线），重启 dsh 后就能用系统浏览器打开'
+          : e.message
+        toast(`链接打不开：${hint}`, true)
+      }
+    }
+  }
+
+  // 面板里的外链一律交给系统浏览器（桌面端 <a target="_blank"> 同样会被 deny）
+  function bindExternalLinks() {
+    document.querySelectorAll('a[target="_blank"]').forEach((a) => {
+      a.onclick = (e) => { e.preventDefault(); e.stopPropagation(); openLink(a.getAttribute('href')) }
+    })
+  }
+
   let toastTimer = null
   function toast(msg, isErr) {
     $toast.textContent = msg
@@ -153,7 +179,7 @@
             <div class="field"><label>TOP · 每平台条数（0=不限）</label>
               <select id="f-top"><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option></select></div>
             <div class="field"><label>DETAIL TOP · YouTube 详情补全条数（调小省积分）</label>
-              <select id="f-detail"><option value="10">10</option><option value="20" selected>20</option></select></div>
+              <select id="f-detail"><option value="10" selected>10</option><option value="20">20</option></select></div>
           </div>
           <div class="hint" id="f-status"></div>
         </div>
@@ -368,6 +394,7 @@
 
   // ---------- 渲染辅助 ----------
   function bindCommon() {
+    bindExternalLinks()
     document.querySelectorAll('[data-open-report]').forEach((b) => {
       b.onclick = () => { openReportView(b.dataset.openReport) }
     })
@@ -377,9 +404,22 @@
       if (!kw) { toast('先填关键词', true); return }
       const platforms = [...document.querySelectorAll('input[name="pf"]:checked')].map((n) => n.value)
       if (!platforms.length) { toast('至少选一个平台', true); return }
-      goBtn.disabled = true
       const status = document.getElementById('f-status')
-      if (status) status.textContent = '搜索中（三平台采集 + YouTube 详情补全，约 1-3 分钟）…'
+      const label = goBtn.innerHTML
+      goBtn.disabled = true
+      // 三平台并行采集通常 20-60s，YouTube 详情补全可能到 2 分钟：给可见的计时器，别让界面像卡死
+      const startedAt = Date.now()
+      const tick = () => {
+        const s = Math.round((Date.now() - startedAt) / 1000)
+        goBtn.textContent = `搜索中… ${s}s`
+        if (status) {
+          status.textContent = s >= 180
+            ? `已 ${s}s：上游较慢（YouTube 点赞/评论需逐条补全），可继续等或点刷新重试（重试会再扣积分）`
+            : `三平台并行采集中，已 ${s}s（通常 20-60s，YouTube 详情补全最慢）…`
+        }
+      }
+      tick()
+      const timer = setInterval(tick, 1000)
       try {
         const r = await apiPost('/api/searches', {
           keywords: kw,
@@ -387,16 +427,19 @@
           days: Number(document.getElementById('f-days')?.value) || 0,
           sort_by: document.getElementById('f-sort')?.value || 'views',
           top: Number(document.getElementById('f-top')?.value) || 5,
-          detail_top: Number(document.getElementById('f-detail')?.value) || 20,
+          detail_top: Number(document.getElementById('f-detail')?.value) || 10,
         })
-        if (r.ok === false) { toast(r.error, r.all_down); if (status) status.textContent = ''; goBtn.disabled = false; return }
+        if (r.ok === false) { toast(r.error, r.all_down); if (status) status.textContent = ''; return }
         toast(`搜索完成：共 ${r.search.total} 条`)
         location.hash = `#/s/${encodeURIComponent(r.search.search_id)}`
       } catch (e) {
         toast(e.message, true)
         if (status) status.textContent = ''
+      } finally {
+        clearInterval(timer)
+        goBtn.innerHTML = label
+        goBtn.disabled = false
       }
-      goBtn.disabled = false
     }
   }
 
@@ -431,6 +474,12 @@
     }
     render().catch(() => {})
   }
+  // 报告 iframe 里的链接点击会 postMessage 过来，统一交给 openLink 走系统浏览器
+  addEventListener('message', (e) => {
+    if (e.origin !== location.origin) return
+    const m = e.data
+    if (m && m.type === 'dsh:open-link' && typeof m.url === 'string') openLink(m.url)
+  })
   addEventListener('hashchange', () => render())
   boot()
   setTimeout(() => { if (!state.catalog?.version || state.catalog.version === '-') boot() }, 2500)

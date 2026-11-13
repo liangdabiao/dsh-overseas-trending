@@ -161,7 +161,7 @@ export const overseasSearchTool = {
           ...items.map((r, i) => `  ${renderRow(r, i + 1)}`),
           '',
         ]),
-        `HTML 报告（卡片/表格双视图）已生成：面板「海外跨平台热文搜索」可查看。`,
+        `HTML 报告（卡片/表格双视图）已生成。桌面端 WebContentsView 会 deny window.open/target=_blank，报告只能在面板内查看——告诉用户点侧栏「海外跨平台热文搜索」的搜索详情页（searchId=${meta.search_id}），不要把磁盘路径当成可点开的入口。`,
       ].filter((s) => s !== undefined).join('\n')
 
       const summary =
